@@ -15,6 +15,8 @@
 #include "dbb_util.h"
 #include "univalue.h"
 
+#include <string.h>
+
 static const char *aesKeyHMAC_Key = "DBBAesKey";
 
 // add definition of two non public libbtc functions
