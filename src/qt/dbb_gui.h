@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QPropertyAnimation>
 #include <QStandardItemModel>
+#include <QUuid>
 
 #include <functional>
 #include <thread>
@@ -24,8 +25,10 @@
 #endif
 
 #include "dbb_app.h"
+#include "dbb_configdata.h"
 #include "dbb_wallet.h"
-#include "dbb_websocketserver.h"
+
+#include "dbb_comserver.h"
 
 #include "backupdialog.h"
 #include "getaddressdialog.h"
@@ -33,10 +36,7 @@
 #include "signconfirmationdialog.h"
 #include "verificationdialog.h"
 
-#define WEBSOCKET_PORT 25698
 #define WALLET_POLL_TIME 25000
-
-class BonjourServiceRegister;
 
 namespace Ui
 {
@@ -135,14 +135,14 @@ signals:
     //emitted when check-for-updates response is available
     void checkForUpdateResponseAvailable(const std::string&, long, bool);
 
+    void comServerIncommingMessage(const QString& msg);
+
 private:
     Ui::MainWindow* ui;
     BackupDialog* backupDialog;
     GetAddressDialog* getAddressDialog;
     VerificationDialog* verificationDialog;
-    WebsocketServer *websocketServer;
     QTimer *walletUpdateTimer;
-    BonjourServiceRegister *bonjourRegister;
     QStandardItemModel *transactionTableModel;
     QLabel* statusBarLabelLeft;
     QLabel* statusBarLabelRight;
@@ -173,6 +173,10 @@ private:
     PaymentProposal* currentPaymentProposalWidget;  //!< UI element for showing a payment proposal
     SignConfirmationDialog* signConfirmationDialog;  //!< UI element for showing a payment proposal
 
+    DBB::DBBConfigdata *configData; //!< configuration data model
+    DBBComServer *comServer;
+    bool smartVerificationDeviceConnected;
+    std::time_t lastPing;
 
     //== Plug / Unplug ==
     //! gets called when the device was sucessfully unlocked (password accepted)
@@ -217,7 +221,8 @@ private slots:
     void setNetLoading(bool status);
     //!slot for a periodical update timer
     void updateTimerFired();
-    
+    void pingComServer();
+
     //== UI ==
     //general proxy function to show an alert;
     void showAlert(const QString& title, const QString& errorOut, bool critical = false);
@@ -351,10 +356,12 @@ private slots:
     //!post
     void postSignaturesForPaymentProposal(DBBWallet* wallet, const UniValue& proposal, const std::vector<std::string>& vSigs);
 
-    //== ECDH Pairing ==
+    //== Smart Verification Pairing ==
     //!send a ecdh pairing request with pubkey to the DBB
-    void sendECDHPairingRequest(const std::string &pubkey);
+    void sendECDHPairingRequest(const std::string &ecdhRequest);
     void amountOfPairingDevicesChanged(int amountOfClients);
+    void pairSmartphone();
+    void comServerMessageParse(const QString& msg);
 
     //== UPDATE CHECKER ==
     bool SendRequest(const std::string& method, const std::string& url, const std::string& args, std::string& responseOut, long& httpcodeOut);
