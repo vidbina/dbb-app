@@ -275,7 +275,7 @@ bool DBBComServer::postNotification(const std::string& payload)
 
         std::string encryptedPayload;
         std::string keyS(encryptionKey.begin(), encryptionKey.end());
-        DBB::encryptAndEncodeCommand(payload, keyS, encryptedPayload);
+        DBB::encryptAndEncodeCommand(payload, keyS, encryptedPayload, false);
         std::fill(keyS.begin(), keyS.end(), 0);
         keyS.clear();
         SendRequest("post", "https://bitcoin.jonasschnelli.ch/dbb/server.php", "c=data&s="+std::to_string(nSequence)+"&uuid="+channelID+"&dt=0&pl="+encryptedPayload, response, httpStatusCode);
