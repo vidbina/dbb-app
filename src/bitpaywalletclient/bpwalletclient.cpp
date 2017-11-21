@@ -1087,7 +1087,7 @@ int logprint_cb(CURL *handle, curl_infotype type,
     switch (type) {
         case CURLINFO_TEXT:
             DBB::LogPrintDebug(std::string(data));
-            printf(data);
+            printf("%s", data);
         default: /* in case a new one is introduced to shock us */
             return 0;
 
@@ -1112,7 +1112,7 @@ int logprint_cb(CURL *handle, curl_infotype type,
     }
 
     DBB::LogPrintDebug(std::string(data));
-    printf(data);
+    printf("%s", data);
     return 0;
 }
 
